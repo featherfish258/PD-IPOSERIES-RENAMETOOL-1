@@ -1,0 +1,57 @@
+name: Build Apps (Windows & Mac)
+
+on: [push] # 只要你上传/更新代码，就同时启动两个打包任务
+
+jobs:
+  # 任务 1：打包 Windows 版 (.exe)
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 安装打包工具
+        run: pip install pyinstaller
+
+      - name: 开始打包 EXE
+        run: pyinstaller -F -w rename_tool.py
+
+      - name: 上传 Windows 产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Version-EXE
+          path: dist/rename_tool.exe # 只上传生成的 exe 文件
+
+  # 任务 2：打包 Mac 版 (.app)
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 安装打包工具
+        run: pip install pyinstaller
+
+      - name: 开始打包 APP
+        run: pyinstaller -F -w rename_tool.py
+
+      - name: 压缩 Mac 应用 (防止权限丢失)
+        run: |
+          cd dist
+          zip -r rename_tool_mac.zip rename_tool.app
+
+      - name: 上传 Mac 产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mac-Version-APP
+          path: dist/rename_tool_mac.zip # 上传压缩包
