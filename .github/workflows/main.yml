@@ -1,0 +1,27 @@
+name: Build Mac App
+
+on: [push] # 每当你上传新代码，机器人就开始干活
+
+jobs:
+  build-mac:
+    runs-on: macos-latest # 使用 GitHub 免费提供的 Mac 虚拟机
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v3
+
+      - name: 安装 Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: 安装打包工具
+        run: pip install pyinstaller
+
+      - name: 开始打包
+        run: pyinstaller -F -w rename_tool.py
+
+      - name: 上传成果物
+        uses: actions/upload-artifact@v3
+        with:
+          name: Mac-Version-App # 下载时的名字
+          path: dist/rename_tool # 打包好的文件路径
